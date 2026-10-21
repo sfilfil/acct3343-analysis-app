@@ -580,10 +580,12 @@ def group_of(u):
 
 def finish(fig, title, height=380):
     """Shared chart styling: title, legend on top, thin margins."""
-    fig.update_layout(title=dict(text=title, font=dict(size=15)), height=height,
+    # The title is pinned to the top so a legend that wraps onto extra rows never covers it.
+    fig.update_layout(title=dict(text=title, font=dict(size=15), y=1, yref="container", yanchor="top",
+                                 pad=dict(t=14)), height=height,
                       font=dict(family="Inter, system-ui, sans-serif"),
                       paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                      margin=dict(l=10, r=10, t=60, b=10),
+                      margin=dict(l=18, r=18, t=60, b=10),
                       legend=dict(orientation="h", yanchor="bottom", y=1.0, x=0, title=None),
                       hoverlabel=dict(font_size=12))
     return fig
@@ -615,7 +617,7 @@ def group_scatter(u, x, y, x_title, y_title, title, hline=None, vline=None, y_pc
         fig.add_vline(x=vline, line_width=1, line_color="#898781")
     fig.update_xaxes(title=x_title, range=view_range(u[x], vline))
     fig.update_yaxes(title=y_title, tickformat=".0%" if y_pct else None, range=view_range(u[y], hline))
-    return finish(fig, title, height=430)
+    return finish(fig, title, height=470).update_layout(margin_t=110)   # room if the legend wraps
 
 
 def view_range(values, line=None):
@@ -635,7 +637,7 @@ def funnel_chart(stages, title):
                            textposition="outside", cliponaxis=False,
                            hovertemplate="%{y}: %{x:,}<extra></extra>"))
     fig.update_yaxes(autorange="reversed")
-    fig.update_xaxes(showticklabels=False, showgrid=False, range=[0, max(counts) * 1.15])
+    fig.update_xaxes(showticklabels=False, showgrid=False, range=[0, max(counts) * 1.3])
     return finish(fig, title, height=260)
 
 
@@ -996,10 +998,15 @@ STYLE = Template("""
 [data-testid="stMetricLabel"] p { font-size: .74rem !important; font-weight: 600; letter-spacing: .08em;
     text-transform: uppercase; color: $muted !important; }
 [data-testid="stMetricValue"] { font-weight: 700; color: $heading !important; }
+@media (max-width: 1100px) {   /* narrow laptops: keep headline numbers inside their cards */
+    [data-testid="stMetric"] { padding: 14px 10px 12px !important; }
+    [data-testid="stMetricValue"] { font-size: 1.6rem !important; } }
 [data-testid="stExpander"] [data-testid="stMetricLabel"] p { font-size: .66rem !important; letter-spacing: .03em; }
 [data-testid="stExpander"] [data-testid="stMetricValue"] { font-size: 1.7rem !important; }
-[data-testid="stPlotlyChart"] { background: $card; border: 1px solid $border; border-radius: 16px;
-    padding: 6px 8px; box-shadow: 0 1px 2px $shadow; }
+/* Plotly draws each chart at the card's full width, so the card gets a ring (box-shadow) instead of a
+   border and no side padding; otherwise the chart's right edge would be cut off. */
+[data-testid="stPlotlyChart"] { background: $card; border-radius: 16px; padding: 6px 0;
+    box-shadow: 0 0 0 1px $border, 0 1px 2px $shadow; }
 [data-testid="stExpander"] details { background: $card; border: 1px solid $border !important;
     border-radius: 14px !important; }
 
@@ -1275,9 +1282,11 @@ with tabs[0]:
     c1.plotly_chart(funnel_chart(result["funnel"]["sell"], "SELL funnel"), width="stretch")
     c2.plotly_chart(funnel_chart(result["funnel"]["buy"], "BUY funnel"), width="stretch")
 
-    mix = pd.DataFrame({"Universe": u["sector"].value_counts(normalize=True),
-                        "SELL": sell["sector"].value_counts(normalize=True),
-                        "BUY": buy["sector"].value_counts(normalize=True)}).fillna(0)
+    shares = {name: frame["sector"].value_counts(normalize=True)
+              for name, frame in (("Universe", u), ("SELL", sell), ("BUY", buy))}
+    # A sector with no SELL or BUY names has a true 0% share: a count of zero, not missing data.
+    mix = pd.DataFrame({name: share.reindex(shares["Universe"].index, fill_value=0.0)
+                        for name, share in shares.items()})
     mix = mix.sort_values("Universe")
     fig = go.Figure()
     for name, color in (("Universe", OTHER_COLOR), ("SELL", SELL_COLOR), ("BUY", BUY_COLOR)):
@@ -1286,7 +1295,7 @@ with tabs[0]:
                              hovertemplate="%{y}: %{x:.0%}<extra>" + name + "</extra>"))
     fig.update_layout(barmode="group", bargap=0.25, bargroupgap=0.08)
     fig.update_xaxes(tickformat=".0%", title="Share of the group")
-    st.plotly_chart(finish(fig, "Sector mix: where the SELL and BUY names come from", 460),
+    st.plotly_chart(finish(fig, "Sector mix: universe vs SELL and BUY", 480).update_layout(margin_t=90),
                     width="stretch")
 
 
@@ -1323,7 +1332,7 @@ with tabs[1]:
         heat.update_yaxes(autorange="reversed")
         heat.update_xaxes(side="top")
         heat = finish(heat, "Red-flag heatmap: top 15 SELL names", 170 + 32 * len(top))
-        st.plotly_chart(heat.update_layout(margin=dict(l=10, r=10, t=110, b=10)), width="stretch")
+        st.plotly_chart(heat.update_layout(margin=dict(l=18, r=18, t=110, b=10)), width="stretch")
         st.caption("Colour = how concerning each measure is compared with every company in scope "
                    "(percentile; darker = worse" + (", after subtracting each sector's average" if vs else "")
                    + "). The number in each cell is the company's actual value.")
@@ -1366,7 +1375,7 @@ with tabs[1]:
              "PROBM_used": settings["beneish_cut"], "Altman_Z": settings["altman_cut"],
              "growth_share": settings["growth_share_min"] / 100}
     st.plotly_chart(group_scatter(u, axes[x_name], axes[y_name], x_name, y_name,
-                                  f"{y_name} vs {x_name}: every company in scope",
+                                  f"{y_name} vs {x_name}",
                                   hline=lines.get(axes[y_name]), vline=lines.get(axes[x_name]),
                                   y_pct=axes[y_name] in ("growth_share", "return_12m")),
                     width="stretch")
@@ -1418,14 +1427,15 @@ with tabs[2]:
     quality = u.assign(GPA_pct=percentile(u["GPA"]), BM_pct=percentile(u["BM"]))
     b1.plotly_chart(group_scatter(quality, "BM_pct", "GPA_pct", "Book-to-market percentile",
                                   "Gross profitability percentile",
-                                  "Quality (GPA) vs price (B/M): top-right is cheap and profitable",
-                                  hline=50, vline=50), width="stretch")
+                                  "Quality vs price (top right = best)",
+                                  hline=50, vline=50).update_layout(margin_t=135, height=495),
+                    width="stretch")   # half-width chart: its legend can wrap onto four rows
     scores = u["F_Score"].dropna().astype(int).value_counts().reindex(range(10), fill_value=0)
     passing = scores.index >= settings["fscore_min"]
     fig = go.Figure(go.Bar(x=scores.index, y=scores.values, marker_cornerradius=4,
                            marker_color=np.where(passing, BUY_COLOR, OTHER_COLOR),
                            hovertemplate="F-score %{x}: %{y} companies<extra></extra>"))
-    fig.update_xaxes(title="Piotroski F-score (complete scores only)", dtick=1)
+    fig.update_xaxes(title="F-score (complete scores)", dtick=1)
     fig.update_yaxes(title="Companies")
     b2.plotly_chart(finish(fig, f"F-score distribution (blue = passes ≥ {settings['fscore_min']})",
                            430), width="stretch")
@@ -1460,7 +1470,7 @@ with tabs[3]:
     if reasons:
         st.markdown("\n".join(f"- {r}" for r in reasons))
 
-    m = st.columns(6)
+    m = [cell for _ in range(2) for cell in st.columns(3)]   # 2 rows of 3, so numbers fit
     m[0].metric("STA", fmt_pct(row["STA"]), help=row["STA_reason"] or None)
     m[1].metric("SNOA", fmt_pct(row["SNOA"], 0), help=row["SNOA_reason"] or None)
     m[2].metric("Beneish PROBM", fmt_num(row["PROBM_used"]),
@@ -1482,26 +1492,26 @@ with tabs[3]:
                              hovertemplate="%{x}: %{y:,.2f}" + unit + "<extra>" + label + "</extra>"))
     fig.update_layout(barmode="group", bargap=0.3, bargroupgap=0.08)
     fig.update_yaxes(title=unit)
-    d1.plotly_chart(finish(fig, "Profit vs cash: is net income backed by operating cash flow?"),
-                    width="stretch")
+    d1.plotly_chart(finish(fig, "Net income vs operating cash flow").update_layout(margin_t=90),
+                    width="stretch")   # room if the legend wraps
     margins = [safe_divide(pd.Series([row["total_revenue" + y] - row["cost_of_revenue" + y]]),
                            pd.Series([row["total_revenue" + y]]), True).iloc[0] for y in history]
     fig = go.Figure(go.Scatter(x=years, y=margins, mode="lines+markers", line=dict(color=BUY_COLOR, width=2),
                                marker=dict(size=9), name="Gross margin",
                                hovertemplate="%{x}: %{y:.1%}<extra></extra>"))
     fig.update_yaxes(tickformat=".0%", title="Gross margin")
-    d2.plotly_chart(finish(fig, "Gross margin trend (Chapter 5 franchise test)"), width="stretch")
+    d2.plotly_chart(finish(fig, "Gross margin trend (Chapter 5)"), width="stretch")
 
     d3, d4 = st.columns(2)
     if pd.notna(row["Altman_Z"]):
-        parts = {"1.2 × working capital / TA": 1.2 * row["X1"], "1.4 × retained earnings / TA": 1.4 * row["X2"],
-                 "3.3 × EBIT / TA": 3.3 * row["X3"], "0.6 × market equity / liabilities": 0.6 * row["X4"],
-                 "0.999 × sales / TA": 0.999 * row["X5"]}
+        parts = {"1.2 × WC / TA": 1.2 * row["X1"], "1.4 × RE / TA": 1.4 * row["X2"],    # course notation
+                 "3.3 × EBIT / TA": 3.3 * row["X3"], "0.6 × MVE / TL": 0.6 * row["X4"],
+                 "0.999 × Sales / TA": 0.999 * row["X5"]}
         fig = go.Figure(go.Bar(x=list(parts.values()), y=list(parts), orientation="h", marker_color=BUY_COLOR,
                                marker_cornerradius=4, hovertemplate="%{y}: %{x:.2f}<extra></extra>"))
         fig.update_yaxes(autorange="reversed")
         fig.update_xaxes(title="Contribution to Z")
-        d3.plotly_chart(finish(fig, f"Altman Z = {row['Altman_Z']:.2f}: what drives it ({row['Altman_zone']})"),
+        d3.plotly_chart(finish(fig, f"Altman Z = {row['Altman_Z']:.2f}: {row['Altman_zone']}"),
                         width="stretch")
     else:
         d3.info(f"Altman Z unavailable: {row['Altman_reason']}.")
@@ -1509,14 +1519,15 @@ with tabs[3]:
     if indices:
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=[BENEISH_MEANS[k][1] for k in indices], y=indices, mode="markers",
-                                 name="Non-manipulators (mean)", marker=dict(color=OTHER_COLOR, size=11)))
+                                 name="Non-manipulators", marker=dict(color=OTHER_COLOR, size=11)))
         fig.add_trace(go.Scatter(x=[BENEISH_MEANS[k][0] for k in indices], y=indices, mode="markers",
-                                 name="Manipulators (mean)", marker=dict(color="#52514e", size=11, symbol="x")))
+                                 name="Manipulators", marker=dict(color="#52514e", size=11, symbol="x")))
         fig.add_trace(go.Scatter(x=[row[k] for k in indices], y=indices, mode="markers", name=pick,
                                  marker=dict(color=SELL_COLOR, size=13, symbol="diamond")))
-        fig.update_xaxes(title="Index value (1.0 = no change from last year)")
+        fig.update_xaxes(title="Index (1.0 = no change)")
         fig.update_yaxes(autorange="reversed")
-        d4.plotly_chart(finish(fig, "Beneish indices vs Beneish (1999) sample means"), width="stretch")
+        fig = finish(fig, "Beneish indices vs 1999 sample means").update_layout(margin_t=110)  # room if the legend wraps
+        d4.plotly_chart(fig, width="stretch")
     else:
         d4.info("Beneish indices unavailable for this company.")
 
