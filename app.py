@@ -467,7 +467,7 @@ def run_screen(measures, s):
     for m in ("STA", "SNOA"):
         u[m + "_basis"] = sector_demean(u, m) if sector_relative else u[m]
         u[m + "_pct"] = percentile(u[m + "_basis"])
-        u["flag_" + m] = u[m + "_pct"].ge(s["accrual_pct"])
+        u["flag_" + m] = u[m + "_pct"].ge(s[m.lower() + "_pct"])     # sta_pct / snoa_pct sliders
     # Beneish: the course's balance-sheet TATA wherever its inputs exist. Yahoo often leaves
     # taxes payable blank, so by default those companies use the published cash-flow TATA.
     u["PROBM_used"], u["PMAN_used"] = u["PROBM"], u["PMAN"]
@@ -996,6 +996,8 @@ STYLE = Template("""
 [data-testid="stMetricLabel"] p { font-size: .74rem !important; font-weight: 600; letter-spacing: .08em;
     text-transform: uppercase; color: $muted !important; }
 [data-testid="stMetricValue"] { font-weight: 700; color: $heading !important; }
+[data-testid="stExpander"] [data-testid="stMetricLabel"] p { font-size: .66rem !important; letter-spacing: .03em; }
+[data-testid="stExpander"] [data-testid="stMetricValue"] { font-size: 1.7rem !important; }
 [data-testid="stPlotlyChart"] { background: $card; border: 1px solid $border; border-radius: 16px;
     padding: 6px 8px; box-shadow: 0 1px 2px $shadow; }
 [data-testid="stExpander"] details { background: $card; border: 1px solid $border !important;
@@ -1075,14 +1077,15 @@ CAP_STEPS = [0.0] + [float(f"{caps.quantile(q):.2g}") for q in (0.25, 0.5, 0.75,
 
 DEFAULTS = dict(
     sectors=[x for x in ALL_SECTORS if x not in ("Real Estate", "Utilities")], min_cap=0.0,
-    benchmark="Sector-relative", accrual_pct=90, beneish_cut=BENEISH_CUTOFF,
+    benchmark="Sector-relative", sta_pct=90, snoa_pct=90, beneish_cut=BENEISH_CUTOFF,
     altman_cut=ALTMAN_DISTRESS, flags_needed=2, valuation_on=True,
     growth_share_min=50, market_return=MARKET_RETURN * 100, sell_rank=SELL_RANKINGS[0],
     buy_guard=True, fscore_min=7, franchise_floor=50, buy_rank=BUY_RANKINGS[0],
     buy_weight=0.5, buy_n=20, tata_version=TATA_OPTIONS[0])
 PRESETS = {
-    "Strict": dict(accrual_pct=95, growth_share_min=70, fscore_min=8, franchise_floor=60, buy_n=15),
-    "Broad": dict(accrual_pct=80, altman_cut=ALTMAN_ORIGINAL, beneish_cut=-2.22,
+    "Strict": dict(sta_pct=95, snoa_pct=95, growth_share_min=70, fscore_min=8, franchise_floor=60,
+                   buy_n=15),
+    "Broad": dict(sta_pct=80, snoa_pct=80, altman_cut=ALTMAN_ORIGINAL, beneish_cut=-2.22,
                   growth_share_min=30, fscore_min=6, franchise_floor=40, buy_n=30),
 }
 
@@ -1119,10 +1122,13 @@ sb.subheader("2 · SELL: red flags")
 sb.radio("Compare accruals with", ["Sector-relative", "Absolute"], key="benchmark", horizontal=True,
          help="Sector-relative subtracts each sector's average first (the course's demeaned "
               "ranking), so asset-heavy industries are not flagged just for their business model.")
-sb.slider("Accrual percentile cutoff (STA and SNOA)", 50, 99, key="accrual_pct",
-          help="Flag a company when its STA or SNOA is at or above this percentile. The default "
-               "90 flags the top decile, the group Sloan's accrual anomaly study (Chapter 3) "
+sb.slider("STA percentile cutoff (accruals)", 50, 99, key="sta_pct",
+          help="Flag a company when its scaled total accruals are at or above this percentile. The "
+               "default 90 flags the top decile, the group Sloan's accrual anomaly study (Chapter 3) "
                "found most overvalued.")
+sb.slider("SNOA percentile cutoff (net operating assets)", 50, 99, key="snoa_pct",
+          help="Flag a company when its scaled net operating assets are at or above this percentile: "
+               "the Chapter 3 'bloated balance sheet' signal.")
 sb.slider("Beneish PROBM above", -3.0, -1.0, step=0.01, key="beneish_cut",
           help="Beneish (1999) cutoff −1.78 ≈ a 3.8% manipulation probability.")
 sb.slider("Altman Z below", 0.5, 3.5, step=0.01, key="altman_cut",
@@ -1292,7 +1298,7 @@ with tabs[1]:
     st.caption(f"At least {settings['flags_needed']} of 4 red flags"
                + (f" and a growth share of price of at least {settings['growth_share_min']}%"
                   if settings["valuation_on"] else "")
-               + f". Ordered by: {settings['sell_rank'].lower()}.")
+               + f". Ordered by: {settings['sell_rank'][0].lower() + settings['sell_rank'][1:]}.")
     if sell.empty:
         st.info("No company meets the SELL rule with these settings. Try the Broad preset or "
                 "lower the number of red flags required.")
@@ -1356,7 +1362,7 @@ with tabs[1]:
     a1, a2 = st.columns(2)
     x_name = a1.selectbox("Chart x-axis", list(axes), index=0, key="sell_x")
     y_name = a2.selectbox("Chart y-axis", list(axes), index=5, key="sell_y")
-    lines = {"STA_pct": settings["accrual_pct"], "SNOA_pct": settings["accrual_pct"],
+    lines = {"STA_pct": settings["sta_pct"], "SNOA_pct": settings["snoa_pct"],
              "PROBM_used": settings["beneish_cut"], "Altman_Z": settings["altman_cut"],
              "growth_share": settings["growth_share_min"] / 100}
     st.plotly_chart(group_scatter(u, axes[x_name], axes[y_name], x_name, y_name,
@@ -1385,7 +1391,7 @@ with tabs[2]:
     rules = ["No red flags"] if settings["buy_guard"] else ["Not a SELL candidate"]
     rules += [f"F-score ≥ {settings['fscore_min']}",
               f"CFOA and Max-Margin at or above the {ordinal(max(settings['franchise_floor'], 1))} "
-              "percentile", f"ranked by {settings['buy_rank'].lower()}"]
+              "percentile", f"ranked by {settings['buy_rank'][0].lower() + settings['buy_rank'][1:]}"]
     st.caption(" · ".join(rules) + ".")
     if buy.empty:
         st.info("No company passes every BUY gate. Lower the F-score minimum or the franchise floor.")
@@ -1567,6 +1573,10 @@ with tabs[4]:
     st.caption("My written case for the top three SELL and BUY names under the course-default "
                "settings. The numbers in each card are calculated live, and the badge shows whether "
                "the company is still selected under the settings chosen in the sidebar.")
+    st.info(f"**Live view, under your current sidebar settings:** top SELL names "
+            f"{', '.join(sell['ticker'].head(3)) or 'none'}; top BUY names "
+            f"{', '.join(buy['ticker'].head(3)) or 'none'}. The written cases below were prepared "
+            "for the course-default settings.")
     all_firms = measures.set_index("ticker")
     for side in ("SELL", "BUY"):
         st.markdown(f"### {side} picks")
@@ -1581,7 +1591,8 @@ with tabs[4]:
                     st.badge(item["verdict"], color="orange" if side == "SELL" else "blue")
                     st.badge(f"Still a {side} under current settings" if still
                              else f"Not a {side} under current settings", color="gray")
-                for column, (label, value) in zip(st.columns(6), EVIDENCE[side]):
+                cells = [cell for _ in range(2) for cell in st.columns(3)]   # 2 rows of 3, so numbers fit
+                for column, (label, value) in zip(cells, EVIDENCE[side]):
                     column.metric(label, value(r))
                 st.markdown(item["text"].replace("$", "\\$"))   # "$" would start a math formula
     st.markdown("### Putting it together")
@@ -1642,6 +1653,9 @@ with tabs[5]:
         "- **Universe:** the instructor's Yahoo screener query (US-listed, NYSE and Nasdaq, market cap "
         f"≥ $300M), largest first. Financial Services firms ({FINANCIALS_EXCLUDED:,} at the pull) are "
         "left out of the query because accrual, Beneish and Altman models do not apply to banks.\n"
+        "- **Default scope:** Real Estate and Utilities start outside the screen because their asset-heavy, "
+        "regulated balance sheets make accrual (SNOA) and Altman scores hard to compare with other sectors. "
+        "Add them back in the sidebar's Sectors box.\n"
         f"- **{len(measures):,} companies in the file → {len(usable):,} usable.** Excluded, with reasons:")
     st.dataframe(excluded.rename_axis("Reason").reset_index(name="Companies"), hide_index=True)
 
