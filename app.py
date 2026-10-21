@@ -37,7 +37,7 @@ import streamlit as st
 DATA_FILE = Path(__file__).with_name("universe.csv")
 
 # Assignment rule 1: my 60 Second Pitch company may not appear anywhere in the app.
-PITCH_TICKER = ""                     # <- the ticker I pitched (dropped below)
+PITCH_TICKER = "UBER"                 # Uber Technologies: my 60 Second Pitch (a long), dropped below
 
 YEARS = ["", "_prev", "_prev2", "_prev3"]   # column suffixes, latest fiscal year first
 FINANCIALS_EXCLUDED = 695      # Financial Services firms the screener query left out (build log)
