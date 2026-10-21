@@ -24,10 +24,10 @@ _prev, _prev2 and _prev3.
 """
 from pathlib import Path
 from statistics import NormalDist
+from string import Template
 
 import numpy as np
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -544,7 +544,7 @@ def run_screen(measures, s):
 # ============================================================================
 # 6. PRESENTATION HELPERS (formatting and charts)
 # ============================================================================
-SELL_COLOR, BUY_COLOR, OTHER_COLOR = "#eb6834", "#2a78d6", "#b4b2a9"   # validated palette slots
+SELL_COLOR, BUY_COLOR, OTHER_COLOR = "#eb6834", "#2a78d6", "#b8bfcc"   # validated palette slots
 
 
 def fmt_pct(x, digits=1):
@@ -581,6 +581,8 @@ def group_of(u):
 def finish(fig, title, height=380):
     """Shared chart styling: title, legend on top, thin margins."""
     fig.update_layout(title=dict(text=title, font=dict(size=15)), height=height,
+                      font=dict(family="Inter, system-ui, sans-serif"),
+                      paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
                       margin=dict(l=10, r=10, t=60, b=10),
                       legend=dict(orientation="h", yanchor="bottom", y=1.0, x=0, title=None),
                       hoverlabel=dict(font_size=12))
@@ -699,8 +701,124 @@ CONCLUSIONS = {
 # ============================================================================
 # 8. PAGE SETUP AND DATA
 # ============================================================================
-st.set_page_config(page_title="Paper Profits · Overvalued Stock Screen", page_icon="🔎",
+st.set_page_config(page_title="Paper Profits · Overvalued Stock Screen", page_icon="🧾",
                    layout="wide")
+
+# Look and feel. The deck allows only three files, so instead of a separate theme file the
+# colours and fonts are set here with CSS: an indigo accent instead of Streamlit's red, a
+# navy sidebar, serif headings, and card-style panels. Light and dark versions follow the
+# viewer's Streamlit theme.
+THEMES = {
+    "light": dict(page="#f3f5fa", card="#ffffff", border="#e1e6f0", heading="#0f1b2d", muted="#5b6476",
+                  accent="#4f46e5", button="#4f46e5", tint="rgba(79,70,229,.08)", ring="rgba(79,70,229,.22)",
+                  tag_bg="#e6e5fc", tag_text="#3730a3", shadow="rgba(15,27,45,.06)"),
+    "dark": dict(page="#0b1120", card="#111a2e", border="#1e2a44", heading="#eef2fa", muted="#9aa6bd",
+                 accent="#818cf8", button="#4f46e5", tint="rgba(129,140,248,.12)", ring="rgba(129,140,248,.28)",
+                 tag_bg="#2b3170", tag_text="#e0e3ff", shadow="rgba(0,0,0,.35)"),
+}
+STYLE = Template("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+
+/* Fonts: Inter for text, Fraunces for headings; icons keep their own icon font */
+.stApp, .stApp p, .stApp li, .stApp label, .stApp input, .stApp button, [data-testid="stMarkdownContainer"],
+[data-testid="stMetricValue"], [data-testid="stWidgetLabel"], [data-testid="stTab"] {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+.stApp h1, .stApp h2, .stApp h3 { font-family: 'Fraunces', Georgia, serif !important; color: $heading;
+    letter-spacing: -0.01em; }
+[data-testid="stIconMaterial"] { font-family: 'Material Symbols Rounded' !important; }
+
+/* Page */
+.stApp { background: $page; }
+[data-testid="stHeader"] { background: transparent; }
+[data-testid="stMainBlockContainer"] { padding-top: 2.4rem; max-width: 1500px; }
+
+/* Header banner */
+.pp-hero { border-radius: 20px; padding: 28px 34px 24px; margin-bottom: 1.3rem; color: #f5f7fc;
+    background: radial-gradient(900px 380px at 88% -30%, rgba(129,140,248,.38), transparent 60%),
+                linear-gradient(135deg, #0f1b2d 0%, #182747 55%, #272f6b 100%);
+    box-shadow: 0 18px 40px rgba(15,27,45,.18); }
+.pp-eyebrow { font-size: .74rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    color: #a5b4fc; }
+.pp-title { font-family: 'Fraunces', Georgia, serif; font-size: 2.9rem; font-weight: 600; line-height: 1.05;
+    margin: .35rem 0 .55rem; color: #ffffff; }
+.pp-title span { color: #a5b4fc; }
+.pp-lede { font-size: 1.04rem; line-height: 1.55; color: #cbd5e8; max-width: 880px; margin: 0 0 1rem; }
+.pp-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.pp-chips span { font-size: .78rem; padding: 4px 11px; border-radius: 999px; color: #e2e8f5;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); }
+.pp-footer { margin-top: 2.6rem; padding-top: 1rem; border-top: 1px solid $border; color: $muted;
+    font-size: .8rem; }
+@media (max-width: 640px) {
+    .pp-hero { padding: 20px 20px 18px; border-radius: 16px; }
+    .pp-title { font-size: 2.2rem; }
+    .pp-lede { font-size: .95rem; } }
+
+/* Cards: headline numbers, charts, expanders */
+[data-testid="stMetric"] { background: $card; border: 1px solid $border !important; border-radius: 16px !important;
+    padding: 16px 18px 14px !important; box-shadow: 0 1px 2px $shadow, 0 10px 24px $shadow; }
+[data-testid="stMetricLabel"] p { font-size: .74rem !important; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; color: $muted !important; }
+[data-testid="stMetricValue"] { font-weight: 700; color: $heading !important; }
+[data-testid="stPlotlyChart"] { background: $card; border: 1px solid $border; border-radius: 16px;
+    padding: 6px 8px; box-shadow: 0 1px 2px $shadow; }
+[data-testid="stExpander"] details { background: $card; border: 1px solid $border !important;
+    border-radius: 14px !important; }
+
+/* Tabs */
+[data-testid="stTabs"] [role="tablist"] { gap: 6px; border-bottom: 1px solid $border; }
+[data-testid="stTab"] { padding: 10px 16px !important; border-radius: 10px 10px 0 0; color: $muted; }
+[data-testid="stTab"] p { font-weight: 600; }
+[data-testid="stTab"]:hover { color: $accent !important; }
+[data-testid="stTab"][aria-selected="true"] { color: $accent !important; background: $tint; }
+[data-testid="stTab"] [class*="SelectionIndicator"] { background-color: $accent !important; height: 3px !important;
+    border-radius: 3px; }
+
+/* Indigo accent on every control that Streamlit colours red by default */
+[data-testid="stBaseButton-primary"] { background: $button !important; border-color: $button !important;
+    color: #ffffff !important; }
+[data-testid="stBaseButton-primary"]:hover { filter: brightness(1.1); }
+[data-testid="stMultiSelectTagsContainer"] [data-tag] { background: $tag_bg !important; color: $tag_text !important; }
+[data-testid="stSlider"] [role="group"] > div > div:first-child { filter: hue-rotate(243deg) saturate(.85); }
+[data-testid="stSlider"] [role="group"] > div > div[style*="absolute"] { background: $accent !important;
+    box-shadow: 0 0 0 4px $ring; }
+[data-testid="stSliderThumbValue"], [data-testid="stSliderThumbValue"] p { color: $accent !important; font-weight: 600; }
+[data-testid="stRadioOption"][data-selected="true"] > div > div:first-child { background: $accent !important;
+    border-color: $accent !important; }
+[data-testid="stCheckbox"][data-selected="true"] label > div:first-of-type { background: $accent !important; }
+[data-testid="stDownloadButton"] button { border-color: $accent !important; color: $accent !important; }
+
+/* Sidebar: a deep navy panel in both light and dark mode */
+[data-testid="stSidebar"] { background: linear-gradient(180deg, #0f1b2d 0%, #18264a 100%);
+    border-right: 1px solid rgba(255,255,255,.06); }
+[data-testid="stSidebar"] h1 { font-family: 'Inter', sans-serif !important; font-size: .78rem !important;
+    font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #a5b4fc !important; }
+[data-testid="stSidebar"] h3 { font-family: 'Inter', sans-serif !important; font-size: .98rem !important;
+    color: #ffffff !important; border-top: 1px solid rgba(255,255,255,.09); padding-top: .9rem !important;
+    margin-top: .4rem; }
+[data-testid="stSidebar"] [data-testid="stWidgetLabel"] p, [data-testid="stSidebar"] [data-testid="stRadioOption"] p,
+[data-testid="stSidebar"] [data-testid="stCheckbox"] p, [data-testid="stSidebar"] summary p { color: #dce3f1 !important; }
+[data-testid="stSidebar"] [data-testid="stSliderTickBar"] p { color: rgba(220,227,241,.6) !important; }
+[data-testid="stSidebar"] [data-testid="stSliderThumbValue"],
+[data-testid="stSidebar"] [data-testid="stSliderThumbValue"] p { color: #c7d2fe !important; }
+[data-testid="stSidebar"] [data-testid="stSlider"] [role="group"] > div > div[style*="absolute"] {
+    background: #a5b4fc !important; box-shadow: 0 0 0 4px rgba(165,180,252,.25); }
+[data-testid="stSidebar"] [data-testid="stRadioOption"][data-selected="true"] > div > div:first-child,
+[data-testid="stSidebar"] [data-testid="stCheckbox"][data-selected="true"] label > div:first-of-type {
+    background: #818cf8 !important; border-color: #818cf8 !important; }
+[data-testid="stSidebar"] [data-testid="stTooltipIcon"], [data-testid="stSidebar"] [data-testid="stTooltipIcon"] button {
+    color: #b4c2dd !important; opacity: 1 !important; }
+[data-testid="stSidebar"] [data-testid="stTooltipIcon"] svg * { stroke: #b4c2dd !important; }
+[data-testid="stSidebar"] [data-testid="stIconMaterial"] { color: #c7d2fe; }
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"] { background: rgba(255,255,255,.06) !important;
+    border: 1px solid rgba(255,255,255,.18) !important; color: #e6ebf5 !important; }
+[data-testid="stSidebar"] [data-testid="stBaseButton-secondary"]:hover { border-color: #a5b4fc !important; }
+[data-testid="stSidebar"] [data-testid="stExpander"] details { background: rgba(255,255,255,.04) !important;
+    border-color: rgba(255,255,255,.12) !important; }
+</style>
+""")
+st.markdown(STYLE.substitute(THEMES["dark" if st.context.theme.type == "dark" else "light"]),
+            unsafe_allow_html=True)
 
 
 @st.cache_data(show_spinner="Loading company data…")
@@ -835,18 +953,23 @@ robust_by_ticker = robustness(measures, data_version, tuple(settings["sectors"])
 u, sell, watch, buy = result["u"], result["sell"], result["watch"], result["buy"]
 
 as_of = usable["data_pulled"].dropna().max()
-st.title("Paper Profits")
-st.markdown("An overvalued-stock screen: companies whose reported profits run ahead of their "
-            "cash, whose balance sheets are bloating or whose finances are fragile, but whose "
-            "prices still assume growth.")
-st.caption(f"ACCT 3343 Analysis App · {len(usable):,} US-listed companies · statements and prices "
-           f"from Yahoo Finance via yfinance, pulled {as_of} · not investment advice")
+st.markdown(f"""
+<div class="pp-hero">
+  <div class="pp-eyebrow">ACCT 3343 · Analysis App · Overvalued stock screen</div>
+  <div class="pp-title">Paper <span>Profits</span></div>
+  <p class="pp-lede">Finds companies whose reported profits run ahead of their cash, whose balance
+  sheets are bloating or whose finances are fragile, but whose share prices still assume growth.
+  Then, as a separate analysis, the financially strong franchises trading at a fair price.</p>
+  <div class="pp-chips"><span>{len(usable):,} US-listed companies</span>
+  <span>Yahoo Finance data pulled {as_of}</span><span>Chapters 2–6 + CAPM</span>
+  <span>Not investment advice</span></div>
+</div>""", unsafe_allow_html=True)
 
 
 def kpi(column, label, now, then, tip=None):
     """A headline number with its change versus the course-default settings."""
     change = now - then
-    column.metric(label, f"{now:,}", f"{change:+,} vs course defaults" if change else "same as course defaults",
+    column.metric(label, f"{now:,}", f"{change:+,} vs defaults" if change else "same as defaults",
                   delta_color="off", delta_arrow="auto" if change else "off", border=True, help=tip)
 
 
@@ -1081,7 +1204,7 @@ with tabs[3]:
     st.caption(f"{row['sector']} · {row['industry']} · market cap {fmt_money(row['current_market_cap'])}"
                f" · latest fiscal year ended {row['fiscal_period_end']:%b %d, %Y}")
     with st.container(horizontal=True):
-        st.badge(status, color={"SELL": "red", "Watchlist": "orange", "BUY": "blue"}.get(status, "gray"))
+        st.badge(status, color={"SELL": "orange", "Watchlist": "violet", "BUY": "blue"}.get(status, "gray"))
         st.badge(f"{int(row['red_flags'])} red flags ({int(row['flags_assessable'])} of 4 assessable)",
                  color="gray")
         st.badge(f"SELL in {int(robust_by_ticker.get(pick, 0))} of 6 standard settings", color="gray",
@@ -1203,7 +1326,7 @@ with tabs[4]:
                 st.markdown(f"#### {side}: {r['company_name']} ({ticker})")
                 st.badge(f"Still a {side} under current settings" if still
                          else f"Not a {side} under current settings",
-                         color=("red" if side == "SELL" else "blue") if still else "gray")
+                         color=("orange" if side == "SELL" else "blue") if still else "gray")
                 e = st.columns(6)
                 e[0].metric("STA", fmt_pct(r["STA"]))
                 e[1].metric("SNOA", fmt_pct(r["SNOA"], 0))
@@ -1356,3 +1479,7 @@ with tabs[5]:
         "- Market equity uses fiscal-year-end shares and price, as in the course. It is left missing when "
         "the statement share count doesn't match today's market cap (ADRs, post-year-end splits).\n"
         "- A red flag starts an investigation; it does not prove manipulation or predict bankruptcy.")
+
+st.markdown(f'<div class="pp-footer">Paper Profits · ACCT 3343 Analysis App · data: Yahoo Finance via '
+            f'yfinance ({as_of}) · methods: <i>Quantitative Value</i> (Gray &amp; Carlisle), Chapters 2–6, '
+            f'and the class CAPM workbook · for coursework, not investment advice</div>', unsafe_allow_html=True)
