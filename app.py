@@ -691,10 +691,246 @@ def why_flagged(row, s):
 # ============================================================================
 CONCLUSIONS = {
     "SELL": [
-        # {"ticker": "XXX", "title": "...", "text": """..."""},
+        {"ticker": "NVMI", "verdict": "SELL · low conviction", "text": """
+**Thesis.** Nova is my first SELL candidate because its stock price still depends heavily on future
+growth, while its reported earnings are slightly less cash-backed than those of its technology peers.
+The company is profitable and financially stable, and its high SNOA turns out to be mostly mechanical
+(see below), but I think the valuation leaves limited room for disappointing results.
+
+**What the financial statements show.** Nova's revenue increased from $571 million in 2022 to
+$881 million in 2025, while net income increased from $140 million to $259 million. Operating cash
+flow also improved from $120 million to $246 million. However, net income exceeded operating cash flow
+by approximately $14 million in 2025.
+
+The screen flags Nova's scaled net operating assets (SNOA), which reached 81% of total assets, placing
+it in the 97th percentile compared with sector peers. Its scaled total accruals (STA) were only 0.6%,
+but still ranked in the 94th percentile compared with sector peers.
+
+Receivables increased from $109 million in 2022 to $152 million in 2025, although revenue grew faster
+over that period. This suggests that receivables alone do not explain the accounting concerns. The
+Beneish asset quality index of 1.31 points to a change in the composition of assets, which I examined
+further.
+
+**Alternative explanations.** The balance sheet explains most of the SNOA flag. Nova's total debt rose
+from $236 million to $799 million in 2025, and it holds $834 million of short-term investments and
+$585 million of longer-term investment securities, but only $214 million of cash and cash equivalents.
+The course's SNOA formula subtracts only cash, so these $1.42 billion of investments count as operating
+assets. Treating them as the financial assets they are, Nova's SNOA would be about 21% rather than 81%.
+The same investments also explain the higher asset quality index.
+
+Nova's strong growth and stable gross margin (55.5% in 2022 to 57.4% in 2025) suggest that the business
+itself is performing well. In addition, operating cash flow exceeded net income in 2024, which weakens
+the argument that earnings are consistently unsupported by cash. I therefore view the accounting
+signals as weak, and the SELL case rests mainly on valuation.
+
+**What the price assumes.** Using a beta of 1.78, the CAPM model estimates a required return of 12.8%.
+Nova's earnings yield is only 2.5% (a P/E of about 41), meaning approximately 81% of its share price is
+attributed to future growth under the app's simplified valuation model. The implied perpetual growth
+rate is 10.4%, compared with actual three-year revenue growth of 15.6% annually. Although recent growth
+supports some of the valuation, maintaining strong growth indefinitely is much harder than achieving it
+over three years.
+
+**Catalyst, risks and verdict.** Over the next 6–12 months, weaker revenue growth or lower margins in
+the semiconductor equipment cycle could cause investors to reconsider the valuation. I would reconsider
+the SELL thesis if operating cash flow consistently exceeded net income and revenue growth stayed
+comfortably above the roughly 10% a year that the price implies. Short interest is 5.0% of float, with
+2.8 days to cover, creating some short-squeeze risk.
+
+**Verdict: SELL, low conviction.** Nova is a strong business. Once its investment portfolio is accounted
+for, the balance-sheet warning largely disappears, and the case depends on its valuation being too high.
+"""},
+        {"ticker": "SNPS", "verdict": "SELL · medium conviction", "text": """
+**Thesis.** Synopsys is a SELL candidate because its operating assets have expanded significantly,
+while its valuation still depends heavily on future growth. Its accounting indicators suggest that the
+balance sheet deserves closer examination.
+
+**Financial evidence and valuation.** Synopsys reported $7.1 billion in revenue in 2025, compared with
+$4.6 billion in 2022. However, total assets increased from $9.4 billion to $48.2 billion over the same
+period. Its SNOA reached 82%, placing it in the 98th percentile compared with sector peers.
+
+The jump reflects the acquisition of Ansys, completed during fiscal 2025: goodwill and intangible assets
+rose from $3.6 billion to $39.6 billion (82% of total assets), funded largely by about $13.5 billion of
+new long-term debt. This explains the Beneish asset quality index of 2.02 and leverage index of 1.75.
+Receivables also increased from $941 million in 2024 to $1.55 billion in 2025, partly because the
+acquired company's receivables were added.
+
+Because the asset increase comes from an acquisition rather than from accruals in the existing
+business, it is not evidence of manipulation. The risk is different: Synopsys now has to earn an
+adequate return on almost $40 billion of acquired assets. Operating cash flow also exceeded net income
+in 2025, which is an important counterargument.
+
+At a 10.0% required return, approximately 85% of the stock price depends on future growth. The implied
+perpetual growth rate is 8.5%, compared with three-year revenue growth of 15.2%.
+
+**Catalyst, risks and verdict.** Over the next 6–12 months, acquisition integration results, operating
+margins and cash generation could affect the valuation. I would reconsider the SELL thesis if the
+enlarged asset base produced sustainable earnings growth while operating cash flow stayed stronger than
+net income. Short interest is 2.6% of float, with 2.5 days to cover.
+
+**Verdict: SELL, medium conviction.** The valuation is demanding and the company must now justify a
+much larger, debt-funded asset base, but the strong cash flow means the accounting concerns should not
+be overstated.
+"""},
+        {"ticker": "COHR", "verdict": "SELL · high conviction", "text": """
+**Thesis.** Coherent is a SELL candidate because its recent earnings improvement has not translated into
+stronger operating cash flow, while its stock price assumes substantial future growth.
+
+**Financial evidence and valuation.** Coherent's net income increased from $49 million in 2025 to
+$805 million in 2026. However, operating cash flow declined from $634 million to only $80 million. This
+created a $725 million gap between reported profit and operating cash flow. Free cash flow also declined
+from positive $193 million to approximately negative $1.0 billion. This is particularly concerning
+because the company's share price increased approximately 97% over the previous 12 months. Its STA
+reached 4.0%, ranking in the 98th percentile compared with sector peers, while SNOA reached 74%, in the
+92nd percentile.
+
+The cash-flow statement explains the gap. Working capital absorbed $1.1 billion: inventory rose from
+$1.44 billion to $2.58 billion (up 79%, while revenue grew 23%) and receivables increased by
+$368 million. Net income also included a $124 million gain on the sale of a business, whose
+$437 million of proceeds appear in investing rather than operating cash flow. Capital spending of
+$1.1 billion then turned free cash flow negative.
+
+One possible explanation is that Coherent is building inventory and capacity for strong demand: revenue
+increased from $5.8 billion to $7.1 billion, and gross margin improved from 35.2% to 37.5%. However,
+inventory growing more than three times faster than sales is a classic accrual warning sign. If demand
+slows, some of that inventory may have to be written down.
+
+At a 14.5% required return, approximately 88% of the share price depends on growth. The implied
+perpetual growth rate is 12.7%, above its historical three-year revenue growth of 11.3%.
+
+**Catalyst, risks and verdict.** The next annual or quarterly financial results could reveal whether
+operating cash flow recovers and whether the inventory build turns into sales. I would reconsider the
+SELL thesis if operating cash flow exceeded net income for two consecutive quarters, free cash flow
+returned to positive territory, and inventory fell back toward its 2025 level relative to sales. Short
+interest is 5.6% of float, with 1.8 days to cover.
+
+**Verdict: SELL, high conviction.** Coherent has the clearest recent disconnect between reported
+earnings and cash generation among these three candidates, driven by a large inventory build, although
+continued growth and improving margins remain important risks to the thesis.
+"""},
     ],
-    "BUY": [],
-    "portfolio": "",
+    "BUY": [
+        {"ticker": "KFY", "verdict": "BUY · high conviction", "text": """
+**Thesis.** Korn Ferry is my first BUY candidate because it combines strong financial performance,
+consistent cash generation and a relatively attractive valuation. The company is not growing rapidly,
+but its profitability and financial strength suggest that the market may be undervaluing its ability to
+generate sustainable returns.
+
+**What the financial statements show.** Korn Ferry's revenue remained relatively stable, increasing from
+$2.8 billion in 2024 to $2.9 billion in 2026. Over the same period, net income increased from
+$169 million to $277 million. The company also generated $414 million in operating cash flow and
+$324 million in free cash flow in 2026, both improvements over the previous year. This demonstrates
+that the business continues to produce cash despite relatively modest revenue growth.
+
+Its Piotroski F-score is 8 out of 9, showing strong overall financial health. The company passes the
+profitability, cash generation, improving return on assets, cash-backed earnings, leverage, liquidity,
+share issuance and asset turnover tests. The only failed signal is gross margin improvement.
+
+**Business quality and valuation.** Korn Ferry's Chapter 5 cash flow on assets (CFOA) is 0.28, placing
+it in the 64th percentile. Its Max-Margin measure ranks in the 88th percentile, suggesting relatively
+strong margin stability. The company's return on capital after tax is 20.1%, indicating that it
+generates attractive returns relative to the capital invested in the business.
+
+From Chapter 2, Korn Ferry has gross profitability of 0.64 and a book-to-market ratio of 0.59 at its
+fiscal year-end (the figure the screen ranks on) and 0.48 at today's price. This means its book equity
+represents approximately 48% of its current market value.
+
+The valuation may reflect concerns about slower hiring activity, economic uncertainty and limited
+revenue growth. These are reasonable concerns for a staffing and consulting business. However, the
+improvement in profitability and continued cash generation suggest that the company may be better
+positioned than its modest revenue growth implies.
+
+**Alternative explanations and risks.** One concern is that gross margin declined from 90.7% in 2023 to
+88.1% in 2026. The company's margins are not improving consistently, and an economic slowdown could
+reduce demand for its services. I also recognize that a high F-score does not automatically mean a
+stock is undervalued. The investment case depends on Korn Ferry maintaining its profitability and
+generating sufficient future returns.
+
+**Catalyst and time horizon.** Over the next 6–12 months, improving hiring demand, stronger consulting
+activity or continued earnings growth could encourage investors to assign a higher valuation to the
+business. I would reconsider the BUY thesis if the F-score fell below 7, operating cash flow declined
+below $300 million annually, or return on capital fell below 15%.
+
+**Verdict: BUY, high conviction.** Korn Ferry offers a strong combination of financial quality, stable
+margins and a valuation that appears reasonable relative to its profitability.
+"""},
+        {"ticker": "TILE", "verdict": "BUY · medium-to-high conviction", "text": """
+**Thesis.** Interface is a BUY candidate because its profitability has improved consistently while its
+valuation remains relatively moderate. Its financial statements suggest that operational improvements
+are producing stronger results.
+
+**Financial evidence and valuation.** Interface's revenue increased from approximately $1.3 billion in
+2022 to $1.4 billion in 2025. More importantly, net income increased from $20 million to $116 million
+over the same period. Gross margin improved every year, rising from 33.7% to 38.7%. This suggests
+better operating performance rather than growth driven entirely by higher sales.
+
+The company has a Piotroski F-score of 8 out of 9. Its CFOA is 0.31, ranking in the 69th percentile,
+while its Max-Margin ranks in the 79th percentile. Return on capital after tax is 15.9%.
+
+Interface's current book-to-market ratio is 0.31, compared with 0.40 at fiscal year-end. The stock has
+become more expensive relative to book value, but its profitability improvements still support further
+investigation. A possible reason for the valuation is concern about commercial construction and
+renovation demand. However, the improvement in margins suggests the company has become more efficient.
+
+**Catalyst, risks and verdict.** Over the next 6–12 months, continued margin improvement and earnings
+growth could support a higher valuation. Short interest is high at 10.0% of float (7.7 days to cover),
+a sign that some investors doubt the recovery. I would reconsider the BUY thesis if gross margin fell
+below 36%, the F-score declined below 7, or annual free cash flow fell below $100 million.
+
+**Verdict: BUY, medium-to-high conviction.** Interface has demonstrated improving profitability,
+although demand sensitivity and its higher current valuation remain risks.
+"""},
+        {"ticker": "BBY", "verdict": "BUY · medium conviction", "text": """
+**Thesis.** Best Buy is a BUY candidate because it continues to generate substantial cash flow and
+attractive returns despite weaker revenue. The company offers financial strength, although its
+valuation is less compelling than the other BUY candidates.
+
+**Financial evidence and valuation.** Best Buy's revenue declined from $46.3 billion in 2023 to
+$41.7 billion in 2026. However, operating cash flow remained strong at approximately $2.0 billion in
+2026, while free cash flow reached $1.3 billion. Gross margin also improved from 21.4% in 2023 to 22.5%
+in 2026, suggesting that the company has maintained some profitability despite lower sales, although
+it slipped slightly in the latest year (from 22.6% to 22.5%).
+
+Best Buy has a Piotroski F-score of 7 out of 9, indicating relatively strong financial health; the two
+tests it fails are that leverage rose and that gross margin dipped in the latest year. Its CFOA is 0.29
+(66th percentile), while its Max-Margin ranks in the 75th percentile. Return on capital after tax is
+20.6%.
+
+The company's gross profitability is 0.64, but its book-to-market ratio is 0.22 at fiscal year-end and
+only 0.15 at today's price, after a 20% rise in the share price over the past year. This is a less
+attractive valuation signal than Korn Ferry or Interface, making the BUY argument more dependent on
+continued cash generation.
+
+**Catalyst, risks and verdict.** Over the next 6–12 months, stabilizing consumer electronics demand and
+continued free cash flow generation could improve investor confidence. I would reconsider the BUY
+thesis if annual free cash flow fell below $1.0 billion, gross margin declined below 21%, or the F-score
+dropped below 7 (it would then fail the screen's F-score gate).
+
+**Verdict: BUY, medium conviction.** Best Buy is financially strong, but declining revenue and its
+relatively low book-to-market ratio make it a less convincing value opportunity.
+"""},
+    ],
+    "portfolio": """
+The three SELL candidates are all technology companies with high net operating assets and valuations
+that depend heavily on future growth. This creates sector concentration and makes the short portfolio
+vulnerable if technology stocks continue performing well. None of them is a distress short: their
+Altman Z-scores (7.96, 3.17 and 7.51) are well above the 1.81 cutoff, so the case is about earnings
+quality and valuation, not bankruptcy risk. The screen's signals are also only moderately robust: all
+three are flagged under the course defaults and the Broad preset, but none under the Strict preset or
+when accruals are measured in absolute terms. After reviewing the statements, my conviction order
+differs from the screen's ranking: Coherent first, then Synopsys, with Nova last.
+
+The BUY candidates are more diversified across staffing services, manufacturing and retail. They share
+strong F-scores, positive cash generation and relatively stable or improving profitability. However,
+their valuations are not equally attractive, which is why Korn Ferry is my preferred BUY. It is also the
+most robust result: Korn Ferry ranks first and Interface ranks in the top three under all six standard
+settings, while Best Buy makes the top three only under the course defaults.
+
+The screen is useful for identifying potential opportunities, but it cannot fully assess management
+quality, competitive advantages, acquisition details or events occurring after the latest financial
+statements. Nova also shows that a measure can be distorted by how a formula classifies assets. These
+recommendations should therefore be treated as starting points for further research rather than
+automatic trading decisions.
+""",
 }
 
 
@@ -1312,35 +1548,44 @@ with tabs[3]:
 # ============================================================================
 # 15. INVESTMENT CONCLUSIONS TAB (my written case; the evidence updates live)
 # ============================================================================
+# Each side shows only its own measures, so the cards respect rule 2 too.
+EVIDENCE = {
+    "SELL": [("STA", lambda r: fmt_pct(r["STA"])), ("SNOA", lambda r: fmt_pct(r["SNOA"], 0)),
+             ("Altman Z", lambda r: fmt_num(r["Altman_Z"])),
+             ("Growth share", lambda r: fmt_pct(r.get("growth_share", np.nan), 0)),
+             ("Short % float", lambda r: fmt_pct(r["current_short_percent_of_float"])),
+             ("12-mo return", lambda r: fmt_pct(r["return_12m"], 0))],
+    "BUY": [("F-score", lambda r: "n/a" if pd.isna(r["F_Score"]) else f"{int(r['F_Score'])} / 9"),
+            ("CFOA", lambda r: fmt_num(r["CFOA"])),
+            ("Max-Margin", lambda r: fmt_num(r.get("Max_Margin", np.nan), 0)),
+            ("GPA", lambda r: fmt_num(r["GPA"])), ("B/M (fiscal)", lambda r: fmt_num(r["BM"])),
+            ("ROC after tax", lambda r: fmt_pct(r["ROC_AfterTax"], 0))],
+}
+
 with tabs[4]:
     st.subheader("Investment conclusions")
-    st.caption("The written case for my top picks under the course-default settings. The "
-               "numbers beside each name are calculated live, and the badge shows whether the "
-               "company is still selected under the settings you have chosen in the sidebar.")
-    if not CONCLUSIONS["SELL"] and not CONCLUSIONS["BUY"]:
-        st.info("Written conclusions are being finalised.")
+    st.caption("My written case for the top three SELL and BUY names under the course-default "
+               "settings. The numbers in each card are calculated live, and the badge shows whether "
+               "the company is still selected under the settings chosen in the sidebar.")
+    all_firms = measures.set_index("ticker")
     for side in ("SELL", "BUY"):
-        for item in CONCLUSIONS[side]:
+        st.markdown(f"### {side} picks")
+        for rank, item in enumerate(CONCLUSIONS[side], start=1):
             ticker = item["ticker"]
             in_scope = ticker in by_ticker.index
-            r = by_ticker.loc[ticker] if in_scope else measures.set_index("ticker").loc[ticker]
+            r = by_ticker.loc[ticker] if in_scope else all_firms.loc[ticker]
             still = in_scope and bool(r[side])
-            with st.container(border=True):
-                st.markdown(f"#### {side}: {r['company_name']} ({ticker})")
-                st.badge(f"Still a {side} under current settings" if still
-                         else f"Not a {side} under current settings",
-                         color=("orange" if side == "SELL" else "blue") if still else "gray")
-                e = st.columns(6)
-                e[0].metric("STA", fmt_pct(r["STA"]))
-                e[1].metric("SNOA", fmt_pct(r["SNOA"], 0))
-                e[2].metric("Altman Z", fmt_num(r["Altman_Z"]))
-                e[3].metric("F-score", "n/a" if pd.isna(r["F_Score"]) else f"{int(r['F_Score'])} / 9")
-                e[4].metric("Growth share", fmt_pct(r.get("growth_share", np.nan), 0))
-                e[5].metric("12-mo return", fmt_pct(r["return_12m"], 0))
-                st.markdown(item["text"])
-    if CONCLUSIONS["portfolio"]:
-        st.markdown("#### Putting it together")
-        st.markdown(CONCLUSIONS["portfolio"])
+            with st.expander(f"{side} #{rank} · {r['company_name']} ({ticker}) · {item['verdict']}",
+                             expanded=rank == 1):
+                with st.container(horizontal=True):
+                    st.badge(item["verdict"], color="orange" if side == "SELL" else "blue")
+                    st.badge(f"Still a {side} under current settings" if still
+                             else f"Not a {side} under current settings", color="gray")
+                for column, (label, value) in zip(st.columns(6), EVIDENCE[side]):
+                    column.metric(label, value(r))
+                st.markdown(item["text"].replace("$", "\\$"))   # "$" would start a math formula
+    st.markdown("### Putting it together")
+    st.markdown(CONCLUSIONS["portfolio"].replace("$", "\\$"))
 
 
 # ============================================================================
