@@ -946,7 +946,10 @@ def robustness(_measures, data_version, sectors, min_cap):
     return counts
 
 
-data_version = DATA_FILE.stat().st_mtime
+# The two cached comparisons above skip hashing the big table (the leading underscore), so
+# their cache key must change whenever anything that shapes their result changes: the data
+# file, the excluded pitch company, the course defaults or the presets.
+data_version = (DATA_FILE.stat().st_mtime, PITCH_TICKER, repr(DEFAULTS), repr(PRESETS))
 result = run_screen(measures, settings)
 baseline = course_default_lists(measures, data_version)
 robust_by_ticker = robustness(measures, data_version, tuple(settings["sectors"]), settings["min_cap"])
